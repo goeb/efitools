@@ -87,7 +87,17 @@ main(int argc, char *argv[])
 	ERR_clear_error();
 
 	BIO *cert_bio = BIO_new_file(certfile, "r");
+	if (!cert_bio) {
+		const char *error = ERR_error_string(ERR_get_error(), 0);
+		fprintf(stderr, "failed to open certificate file: %s\n", error);
+		exit(1);
+	}
 	X509 *cert = PEM_read_bio_X509(cert_bio, NULL, NULL, NULL);
+	if (!cert) {
+		const char *error = ERR_error_string(ERR_get_error(), 0);
+		fprintf(stderr, "failed to load certificate: %s\n", error);
+		exit(1);
+	}
 	int PkCertLen = i2d_X509(cert, NULL);
 
 	PkCertLen += sizeof(EFI_SIGNATURE_LIST) + OFFSET_OF(EFI_SIGNATURE_DATA, SignatureData);
